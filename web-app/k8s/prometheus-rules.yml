@@ -1,0 +1,20 @@
+groups:
+- name: web-app-alerts
+  rules:
+  - alert: HighRequestRate
+    expr: rate(http_requests_total[1m]) > 5
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: High request rate detected
+      description: "Request rate is {{ $value }} requests per second for the past 1 minute (threshold: 5 req/s)"
+  
+  - alert: HighResponseTime
+    expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 0.1
+    for: 1m
+    labels:
+      severity: warning
+    annotations:
+      summary: High response time detected
+      description: "95th percentile response time is {{ $value }}s for the past 5 minutes (threshold: 0.1s)"

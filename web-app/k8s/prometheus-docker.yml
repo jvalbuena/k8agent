@@ -1,0 +1,36 @@
+# Prometheus configuration for Docker with Kubernetes metrics
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'web-app'
+    static_configs:
+      - targets: ['web-app:3000']
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+      
+  # This uses kubectl port-forward to access kube-state-metrics
+  - job_name: 'kube-state-metrics'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+      
+  # This uses kubectl proxy to access metrics-server data
+  - job_name: 'kubernetes-nodes-cadvisor'
+    scrape_interval: 10s
+    metrics_path: /api/v1/nodes/docker-desktop/proxy/metrics/cadvisor
+    scheme: http
+    static_configs:
+    - targets:
+      - 'host.docker.internal:8001'
+      
+  # Scrape the metrics-server api-server proxy
+  - job_name: 'kubernetes-nodes'
+    scrape_interval: 10s
+    metrics_path: /api/v1/nodes/docker-desktop/proxy/metrics
+    scheme: http
+    static_configs:
+    - targets:
+      - 'host.docker.internal:8001'
